@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import logging
+import time
 from urllib.parse import urljoin, urlparse
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -42,7 +43,6 @@ def get_new_link(soup: BeautifulSoup, start_url: str):
             links.append(cleaned_link)
     return links
 
-
 def extract_text(soup: BeautifulSoup) -> str:
     """
     Extracts text from soup
@@ -70,7 +70,12 @@ def crawl(start_url: str = URL, politeness: float = POLITENESS_WINDOW) -> dict[s
 
         if url in visited:
             continue
-
+        
+        # politiness window of 6 seconds between requests
+        if queue:
+            logger.info(f"Waiting {politeness}s before next request...")
+            time.sleep(politeness)
+            
         logger.info(f"Crawling: {url}")
         visited.add(url)
 
@@ -79,9 +84,10 @@ def crawl(start_url: str = URL, politeness: float = POLITENESS_WINDOW) -> dict[s
             continue
         pages[url] = extract_text(soup)
 
+        for link in get_new_link(soup, url):
+            if link not in visited and link not in queue:
+                 queue.append(link)
 
-        
-    
     logger.info(f"Crawl over")
     
 
