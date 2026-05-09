@@ -66,22 +66,23 @@ def crawl(start_url: str = URL, politeness: float = POLITENESS_WINDOW) -> dict[s
     pages: dict[str, str] = {}
 
     while queue:
-        url = queue.poop(0)
+        url = queue.pop(0)
 
         if url in visited:
             continue
-        
-        # politiness window of 6 seconds between requests
-        if queue:
-            logger.info(f"Waiting {politeness}s before next request...")
-            time.sleep(politeness)
-            
+
         logger.info(f"Crawling: {url}")
         visited.add(url)
 
         soup = get_page(url, session)
         if soup is None:
             continue
+        
+        # politiness window of 6 seconds between requests
+        if queue:
+            logger.info(f"Waiting {politeness}s before next request...")
+            time.sleep(politeness)
+
         pages[url] = extract_text(soup)
 
         for link in get_new_link(soup, url):
@@ -91,5 +92,8 @@ def crawl(start_url: str = URL, politeness: float = POLITENESS_WINDOW) -> dict[s
     logger.info(f"Crawl over")
     
 
-init __name__ == "__main__":
+if __name__ == "__main__":
     results = crawl()
+    for url, text in results.items():
+        print(f"\n=== {url} ===")
+        print(text[:200])
