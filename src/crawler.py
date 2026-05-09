@@ -90,10 +90,4 @@ def crawl(start_url: str = URL, politeness: float = POLITENESS_WINDOW) -> dict[s
                  queue.append(link)
 
     logger.info(f"Crawl over")
-    
-
-if __name__ == "__main__":
-    results = crawl()
-    for url, text in results.items():
-        print(f"\n=== {url} ===")
-        print(text[:200])
+    return pages
