@@ -24,7 +24,26 @@ def get_page(url: str, session: requests.session) -> BeautifulSoup | None :
         logger.warning(f"Failed to fetch {url}: {e}")
         return None
 
-def extract_text_(soup: BeautifulSoup) -> str:
+def get_new_link(soup: BeautifulSoup, start_url: str):
+    """
+    Get and returns all new links from page
+    """
+    links = []
+    starting_domain = urlparse(start_url).netloc
+
+    for tag in soup.find_all("a", href=True):
+        href = tag["href"]
+        full_url = urljoin(start_url, href)
+        # links of same domain
+        parsed = urlparse(full_url)
+        if parsed.netloc == starting_domain and parsed.scheme in ("http", "https"):
+            #strip parsed url
+            cleaned_link = parsed._replace(fragment="").geturl().rstrip("/")
+            links.append(cleaned_link)
+    return links
+
+
+def extract_text(soup: BeautifulSoup) -> str:
     """
     Extracts text from soup
     Returns text without whitespaces
@@ -44,6 +63,7 @@ def crawl(start_url: str = URL, politeness: float = POLITENESS_WINDOW) -> dict[s
 
     visited: set[str] = set()
     queue: list[str] = [start_url.rstrip("/")]
+    pages: dict[str, str] = {}
 
     while queue:
         url = queue.poop(0)
@@ -57,8 +77,10 @@ def crawl(start_url: str = URL, politeness: float = POLITENESS_WINDOW) -> dict[s
         soup = get_page(url, session)
         if soup is None:
             continue
+        pages[url] = extract_text(soup)
 
 
+        
     
     logger.info(f"Crawl over")
     
