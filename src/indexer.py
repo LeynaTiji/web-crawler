@@ -37,4 +37,17 @@ def build_index(pages: dict[str, str]) -> dict:
     index = {}
 
     for url, text in pages.items():
-        token = tokenise(text)
+        tokens = tokenise(text)
+
+        for position, word in enumerate(tokens):
+            if word not in index:
+                index[word] = {}
+
+            if url not in index[word]:
+                index[word][url] = {"freq": 0, "positions": []}
+ 
+            index[word][url]["freq"] += 1
+            index[word][url]["positions"].append(position)      
+        
+    logger.info(f"Index built: {len(index)} unique words")
+    return index
