@@ -23,3 +23,35 @@ class TestTokenise(unittest.TestCase):
         result = tokenise("too   many   spaces")
         self.assertEqual(result, ["too", "many", "spaces"])
 
+class TestBuildIndex(unittest.TestCase):
+
+    def setUp(self):
+        self.pages = {
+            "https://example.com/page1": "good im doing good too",
+            "https://example.com/page2": "good morning everyone",
+        }
+        self.index = build_index(self.pages)
+
+    def test_word_appears_in_correct_pages(self):
+        self.assertIn("https://example.com/page1", self.index["good"])
+        self.assertIn("https://example.com/page2", self.index["good"])
+ 
+    def test_word_only_in_one_page(self):
+        self.assertIn("https://example.com/page1", self.index["doing"])
+        self.assertNotIn("https://example.com/page2", self.index.get("doing", {}))
+ 
+    def test_frequency_is_correct(self):
+        # good appears twice in page 1
+        self.assertEqual(self.index["good"]["https://example.com/page1"]["freq"], 2)
+ 
+    def test_positions_are_recorded(self):
+        positions = self.index["good"]["https://example.com/page1"]["positions"]
+        # [0,3] position of good
+        self.assertEqual(positions, [0, 3])
+ 
+    def test_empty_pages_returns_empty_index(self):
+        self.assertEqual(build_index({}), {})
+ 
+    def test_case_insensitive(self):
+        index = build_index({"https://example.com": "Good good GOOD"})
+        self.assertEqual(index["good"]["https://example.com"]["freq"], 3)
