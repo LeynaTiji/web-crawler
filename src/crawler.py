@@ -48,6 +48,10 @@ def extract_text(soup: BeautifulSoup) -> str:
     Extracts text from soup
     Returns text without whitespaces
     """
+    #removes tags before extracting text
+    for tag in soup(["script", "style", "noscript", "header", "footer", "nav"]):
+        tag.decompose()
+
     text = soup.get_text(separator=" ")
     # cut out whitespaces
     return " ".join(text.split())
@@ -77,17 +81,17 @@ def crawl(start_url: str = URL, politeness: float = POLITENESS_WINDOW) -> dict[s
         soup = get_page(url, session)
         if soup is None:
             continue
-        
-        # politiness window of 6 seconds between requests
-        if queue:
-            logger.info(f"Waiting {politeness}s before next request...")
-            time.sleep(politeness)
 
         pages[url] = extract_text(soup)
 
         for link in get_new_link(soup, url):
             if link not in visited and link not in queue:
                  queue.append(link)
+        
+        # politiness window of 6 seconds between requests
+        if queue:
+            logger.info(f"Waiting {politeness}s before next request...")
+            time.sleep(politeness)
 
     logger.info(f"Crawl over")
     return pages
