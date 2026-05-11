@@ -17,6 +17,15 @@ def tokenise(text: str) -> list[str]:
     raw_tokens = re.findall(r"[a-z0-9]+", text.lower())
     return raw_tokens
 
+def save_index(index: dict, path: Path):
+    """
+    Stores inex in JSON file. 
+    """
+    # implemented using https://www.geeksforgeeks.org/python/json-dump-in-python/
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(index, f, indent=2)
+    logger.info(f"Index saved to {path}")
+
 
 def build_index(pages: dict[str, str]) -> dict:
     """
