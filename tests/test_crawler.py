@@ -68,6 +68,7 @@ class TestExtractText(unittest.TestCase):
         soup = make_soup("<nav>Home Authors Tags</nav><p>Quote text</p>")
         text = extract_text(soup)
         self.assertNotIn("Home", text)
+        self.assertIn("Quote text", text)
  
     def test_collapses_whitespace(self):
         soup = make_soup("<p>too   many    spaces</p>")
@@ -78,6 +79,12 @@ class TestExtractText(unittest.TestCase):
         soup = make_soup("")
         text = extract_text(soup)
         self.assertEqual(text, "")
+
+    def test_strips_header_tags(self):
+        soup = make_soup("<header>Menu Stuff</header><p>Quote text</p>")
+        text = extract_text(soup)
+        self.assertNotIn("Menu", text)
+        self.assertIn("Quote text", text)
 
 # class TestGetPage(unittest.TestCase):
 
