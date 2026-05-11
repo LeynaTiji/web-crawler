@@ -48,6 +48,10 @@ def extract_text(soup: BeautifulSoup) -> str:
     Extracts text from soup
     Returns text without whitespaces
     """
+    #removes tags before extracting text
+    for tag in soup(["script", "style", "noscript", "header", "footer", "nav"]):
+        tag.decompose()
+
     text = soup.get_text(separator=" ")
     # cut out whitespaces
     return " ".join(text.split())
