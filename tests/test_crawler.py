@@ -1,5 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
+
+import requests
 from bs4 import BeautifulSoup
  
 from src.crawler import get_new_link, extract_text, get_page, crawl
@@ -86,6 +88,25 @@ class TestExtractText(unittest.TestCase):
         self.assertNotIn("Menu", text)
         self.assertIn("Quote text", text)
 
-# class TestGetPage(unittest.TestCase):
+class TestGetPage(unittest.TestCase):
+    @patch("src.crawler.requests.Session.get")
+    def test_returns_soup_on_success(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.text = "<p>Hello</p>"
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+        session = requests.Session()
+        soup = get_page("https://quotes.toscrape.com", session)
+        self.assertIsNotNone(soup)
+ 
+    @patch("src.crawler.requests.Session.get")
+    def test_returns_none_on_http_error(self, mock_get):
+        mock_get.side_effect = requests.RequestException("404 Not Found")
+        session = requests.Session()
+        soup = get_page("https://quotes.toscrape.com/bad-url", session)
+        self.assertIsNone(soup)
+ 
+
 
 # class TestCrawl(unittest.TestCase):
