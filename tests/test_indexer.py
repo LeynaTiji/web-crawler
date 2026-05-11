@@ -55,3 +55,12 @@ class TestBuildIndex(unittest.TestCase):
     def test_case_insensitive(self):
         index = build_index({"https://example.com": "Good good GOOD"})
         self.assertEqual(index["good"]["https://example.com"]["freq"], 3)
+
+class TestSaveIndex(unittest.TestCase):
+
+    def test_save_creates_parent_directory(self):
+        index = {"test": {}}
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "subdir" / "index.json"
+            save_index(index, path)
+            self.assertTrue(path.exists())
