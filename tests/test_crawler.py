@@ -107,6 +107,34 @@ class TestGetPage(unittest.TestCase):
         soup = get_page("https://quotes.toscrape.com/bad-url", session)
         self.assertIsNone(soup)
  
+class TestCrawl(unittest.TestCase):
 
+    @patch("src.crawler.get_page")
+    # prevent tests from waiting 6 seconds
+    @patch("src.crawler.time.sleep")
+    def test_crawl_visits_linked_pages(self, mock_sleep, mock_get_page):
+        page1 = make_soup('<p>Quote one</p><a href="/page/2/">next</a>')
+        page2 = make_soup("<p>Quote two</p>")
+        # return page 1 for the first call, page 2 for the second
+        mock_get_page.side_effect = [page1, page2]
+        results = crawl("https://quotes.toscrape.com", politeness=0)
+        self.assertEqual(len(results), 2)
+ 
+    @patch("src.crawler.get_page")
+    @patch("src.crawler.time.sleep")
+    def test_crawl_does_not_revisit_pages(self, mock_sleep, mock_get_page):
+        #page links back to itself, crawler must not loop forever
+        page = make_soup('<p>Text</p><a href="/">home</a>')
+        mock_get_page.return_value = page
+        results = crawl("https://quotes.toscrape.com", politeness=0)
+        # should only visit the one page, not infinite loop
+        self.assertEqual(mock_get_page.call_count, 1)
+ 
+    @patch("src.crawler.get_page")
+    @patch("src.crawler.time.sleep")
+    def test_crawl_skips_failed_pages(self, mock_sleep, mock_get_page):
+        # get_page returns None (simulating a network error)
+        mock_get_page.return_value = None
+        results = crawl("https://quotes.toscrape.com", politeness=0)
+        self.assertEqual(results, {})
 
-# class TestCrawl(unittest.TestCase):
