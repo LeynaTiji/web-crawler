@@ -29,7 +29,7 @@ def save_index(index: dict, path: Path):
 
 def build_index(pages: dict[str, str]) -> dict:
     """
-    Builds an inverted index of urls to page text
+    Builds an inverted index of urls to page text, storing statistics about the words.
     
     Returns the completed index dict.
     """
