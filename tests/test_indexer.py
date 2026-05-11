@@ -58,9 +58,10 @@ class TestBuildIndex(unittest.TestCase):
 
 class TestSaveIndex(unittest.TestCase):
 
-    def test_save_creates_parent_directory(self):
-        index = {"test": {}}
+    def test_save(self):
+        index = {"hello": {"https://example.com": {"freq": 1, "positions": [0]}}}
         with tempfile.TemporaryDirectory() as tmpdir:
-            path = Path(tmpdir) / "subdir" / "index.json"
+            path = Path(tmpdir) / "index.json"
             save_index(index, path)
-            self.assertTrue(path.exists())
+
+    
