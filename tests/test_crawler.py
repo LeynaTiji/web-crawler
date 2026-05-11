@@ -45,7 +45,39 @@ class TestGetNewLinks(unittest.TestCase):
         self.assertEqual(links.count("https://quotes.toscrape.com/page/2"), 2)
 
 class TestExtractText(unittest.TestCase):
-    
+
+    def test_extracts_visible_text(self):
+        soup = make_soup("<p>Hello world</p>")
+        text = extract_text(soup)
+        self.assertNotIn("<p>", text)
+        self.assertIn("Hello world", text)
+
+    def test_strips_script_tags(self):
+        soup = make_soup("<script>alert('xss')</script><p>Real content</p>")
+        text = extract_text(soup)
+        self.assertNotIn("alert", text)
+        self.assertIn("Real content", text)
+
+    def test_strips_style_tags(self):
+        soup = make_soup("<style>body { color: red; }</style><p>Visible</p>")
+        text = extract_text(soup)
+        self.assertNotIn("color", text)
+        self.assertIn("Visible", text)
+
+    def test_strips_nav_tags(self):
+        soup = make_soup("<nav>Home Authors Tags</nav><p>Quote text</p>")
+        text = extract_text(soup)
+        self.assertNotIn("Home", text)
+ 
+    def test_collapses_whitespace(self):
+        soup = make_soup("<p>too   many    spaces</p>")
+        text = extract_text(soup)
+        self.assertNotIn("  ", text)
+ 
+    def test_empty_page_returns_empty_string(self):
+        soup = make_soup("")
+        text = extract_text(soup)
+        self.assertEqual(text, "")
 
 # class TestGetPage(unittest.TestCase):
 
