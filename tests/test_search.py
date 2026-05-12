@@ -6,6 +6,10 @@ import sys
 from src.search import find_query, print_word, compute_TFIDF
 
 SAMPLE_INDEX = {
+    "page_lengths": {
+        "https://example.com/page1": 50,
+        "https://example.com/page2": 30,
+    },
     "good": {
         "https://example.com/page1": {"freq": 3, "positions": [0, 5, 12]},
         "https://example.com/page2": {"freq": 1, "positions": [4]},
@@ -93,8 +97,8 @@ class TestTFIDF(unittest.TestCase):
         self.assertIsInstance(score, float)
  
     def test_higher_frequency_gives_higher_score(self):
-        score1 = compute_TFIDF("good", "https://example.com/page1", SAMPLE_INDEX, 2)
-        score2 = compute_TFIDF("good", "https://example.com/page2", SAMPLE_INDEX, 2)
+        score1 = compute_TFIDF("good", "https://example.com/page1", SAMPLE_INDEX, 10)
+        score2 = compute_TFIDF("good", "https://example.com/page2", SAMPLE_INDEX, 10)
         self.assertGreater(score1, score2)
  
     def test_rare_word_scores_higher_idf(self):
