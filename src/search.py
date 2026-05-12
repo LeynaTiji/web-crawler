@@ -37,3 +37,31 @@ def find_query(query: str, index: dict) -> list[tuple[str, int]]:
     score.sort(key=lambda x: x[1], reverse=True)
     return score
 
+def print_word(query: str, index: dict):
+    """
+    Print inverted index for a given word, showing page, frequency and position of word.
+    """
+
+    query = query.lower.strip()
+
+    if not query:
+        print("Please provide a word to look up.")
+        return
+    
+    if query not in index:
+        print(f"Word '{query}' not found in index.")
+        return
+    
+    entries = index[query]
+    print(f"\nInverted index for '{query}' ({len(entries)} page(s)):\n")
+
+    for url, data in entries:
+        freq = data["freq"]
+        positions = data["positions"]
+        print(f"  {url}")
+        print(f"    Frequency : {freq}")
+        # if list is longer than 10 add '...'
+        print(f"    Positions : {positions[:10]}{'...' if len(positions) > 10 else ''}")
+        print()   
+        
+

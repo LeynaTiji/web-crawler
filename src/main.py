@@ -6,7 +6,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 
 from crawler import crawl, URL
 from indexer import build_index, save_index
-from search import find_query
+from search import find_query, print_word
 
 BANNER = """
 ╔══════════════════════════════════════╗
@@ -62,6 +62,24 @@ def find(args: str, index: dict):
         print(f"  {rank}. {url}  (score: {score})")
     print()
     
+def print(args: str, index: dict):
+    """
+    Print index entry for inputted word
+    """
+    if not index:
+        print("No index loaded. Run 'build' or 'load' first.")
+        return
+    if not args.strip():
+        print("Usage: print <word>  (e.g. print indifference)")
+        return
+    # print takes a single word
+    words = args.strip().split()
+    if len(words) > 1:
+        print(f"Note: 'print' only looks up one word. Showing results for '{words[0]}' instead.")
+    print_word(words[0], index)
+
+def load():
+    
 
 def run_shell():
     """
@@ -86,8 +104,8 @@ def run_shell():
             index = build(index)
         # elif command == "load":
         #     index = load(index)
-        # elif command == "print":
-        #     print(args, index)
+        elif command == "print":
+            print(args, index)
         elif command == "find":
             find(args, index)
         elif command == "help":
