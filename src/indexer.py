@@ -17,7 +17,7 @@ def tokenise(text: str) -> list[str]:
     raw_tokens = re.findall(r"[a-z0-9]+", text.lower())
     return raw_tokens
 
-def save_index(index: dict, path: Path):
+def save_index(index: dict, path: Path = INDEX_PATH):
     """
     Stores inex in JSON file. 
     """
@@ -26,6 +26,20 @@ def save_index(index: dict, path: Path):
         json.dump(index, f, indent=2)
     logger.info(f"Index saved to {path}")
 
+def load_index(path: Path = INDEX_PATH) -> dict:
+    """
+    Load the index from json file
+    if index doesnt exist, raise error
+    """
+    if not path.exists():
+        raise FileNotFoundError(
+            f"No index found at {path}. Run 'build' first."
+        )
+    
+    with open(path, "r", encoding="utf-8") as f:
+        index = json.load(f)
+    logger.info(f"Index loaded from {path} ({len(index)} words)")
+    return index
 
 def build_index(pages: dict[str, str]) -> dict:
     """
