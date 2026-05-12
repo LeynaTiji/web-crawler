@@ -116,8 +116,7 @@ def run_shell():
         elif command == "find":
             cmd_find(args, index)
         elif command == "help":
-            print(HELP_TEXT)
- 
+            print(HELP_TEXT) 
         elif command in ("quit", "exit"):
             print("Goodbye.")
             sys.exit(0)

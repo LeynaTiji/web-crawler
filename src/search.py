@@ -42,7 +42,7 @@ def print_word(query: str, index: dict):
     Print inverted index for a given word, showing page, frequency and position of word.
     """
 
-    query = query.lower.strip()
+    query = query.lower().strip()
 
     if not query:
         print("Please provide a word to look up.")
@@ -55,7 +55,7 @@ def print_word(query: str, index: dict):
     entries = index[query]
     print(f"\nInverted index for '{query}' ({len(entries)} page(s)):\n")
 
-    for url, data in entries:
+    for url, data in entries.items():
         freq = data["freq"]
         positions = data["positions"]
         print(f"  {url}")
