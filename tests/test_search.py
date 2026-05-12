@@ -67,4 +67,20 @@ class TestPrintWords(unittest.TestCase):
         sys.stdout = sys.__stdout__
         return captured.getvalue()
     
-    
+    def test_prints_word_info(self):
+        output = self._capture_output("good", SAMPLE_INDEX)
+        self.assertIn("good", output)
+        self.assertIn("https://example.com/page1", output)
+
+    def test_word_not_in_index_prints_message(self):
+        output = self._capture_output("nonsense", SAMPLE_INDEX)
+        self.assertIn("not found ", output)
+
+    def test_empty_word_prints_usage_message(self):
+        output = self._capture_output("", SAMPLE_INDEX)
+        self.assertIn("Please provide", output)
+ 
+    def test_case_insensitive(self):
+        output_lower = self._capture_output("good", SAMPLE_INDEX)
+        output_upper = self._capture_output("GOOD", SAMPLE_INDEX)
+        self.assertEqual(output_lower, output_upper)
