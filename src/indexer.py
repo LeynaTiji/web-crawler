@@ -5,8 +5,6 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-INDEX_PATH = Path("data/index.json")
-
 def tokenise(text: str) -> list[str]:
     """
     Split text into a list of tokens. Make the text lowercase and remove punctuation or whitespace.
