@@ -2,7 +2,7 @@ import logging
  
 logger = logging.getLogger(__name__)
 
-def find(query: str, index: dict) -> list[tuple[str, int]]:
+def find_query(query: str, index: dict) -> list[tuple[str, int]]:
     """
     Find all pages containing every word in the query.
 

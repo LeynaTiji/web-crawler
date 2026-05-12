@@ -6,6 +6,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 
 from crawler import crawl, URL
 from indexer import build_index, save_index
+from search import find_query
 
 BANNER = """
 ╔══════════════════════════════════════╗
@@ -37,6 +38,31 @@ def build(index_state: dict) -> dict:
     print(f"\nCrawling done. Indexed {len(pages)} pages and {len(index)} unique words.")
     return index
 
+def find(args: str, index: dict):
+    """
+    Find pages containing all words in query
+    """
+    if not index:
+        print("No index loaded. Run 'build' or 'load' first.")
+        return
+    
+    query = args.strip()
+    if not query:
+        print("Usage: find <query>  (e.g. find love, find happy friends)")
+        return
+    
+    results = find_query(query, index)
+    if not results:
+        print(f"No pages found containing all words in '{query}'.")
+        return
+    
+    print(f"\nPages containing {query} "
+          f"(ranked by relevance):\n")
+    for rank, (url, score) in enumerate(results, start=1):
+        print(f"  {rank}. {url}  (score: {score})")
+    print()
+    
+
 def run_shell():
     """
     Reads commands 
@@ -62,8 +88,8 @@ def run_shell():
         #     index = load(index)
         # elif command == "print":
         #     print(args, index)
-        # elif command == "find":
-        #     find(args, index)
+        elif command == "find":
+            find(args, index)
         elif command == "help":
             print(HELP_TEXT)
  
