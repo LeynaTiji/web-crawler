@@ -37,7 +37,7 @@ def compute_TFIDF(word: str, url: str, index: dict, total_pages: int):
     # get page length or default to empty set
     page_lengths = index.get("page_lengths", {})
     # get url
-    doc_length = page_lengths.get(url)
+    doc_length = page_lengths.get(url, 0)
 
     # computes TF 
     tf = frequency / doc_length if doc_length > 0 else 0
