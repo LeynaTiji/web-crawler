@@ -60,8 +60,7 @@ def print_word(query: str, index: dict):
         positions = data["positions"]
         print(f"  {url}")
         print(f"    Frequency : {freq}")
-        # if list is longer than 10 add '...'
-        print(f"    Positions : {positions[:10]}{'...' if len(positions) > 10 else ''}")
+        print(f"    Positions : {positions}")
         print()   
         
 

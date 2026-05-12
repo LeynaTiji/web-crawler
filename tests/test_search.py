@@ -1,4 +1,6 @@
 import unittest
+from io import StringIO
+import sys
 
 from src.search import find_query, print_word
 
@@ -54,3 +56,15 @@ class TestFind(unittest.TestCase):
         results = find_query("good", SAMPLE_INDEX)
         self.assertIsInstance(results[0], tuple)
         self.assertEqual(len(results[0]), 2)
+
+class TestPrintWords(unittest.TestCase):
+
+    def _capture_output(self, word, index):
+        """Helper function to run print_word and capture what it prints"""
+        captured = StringIO()
+        sys.stdout = captured
+        print_word(word, index)
+        sys.stdout = sys.__stdout__
+        return captured.getvalue()
+    
+    
