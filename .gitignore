@@ -5,4 +5,4 @@ __pycache__/
 *.cache
 
 .venv
-.index.json
+index.json
