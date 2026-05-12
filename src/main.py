@@ -5,7 +5,7 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 from crawler import crawl, URL
-from indexer import build_index, save_index
+from indexer import build_index, save_index, load_index
 from search import find_query, print_word
 
 BANNER = """
@@ -25,20 +25,18 @@ Available commands:
   quit / exit        Exit the program
 """
 
-INDEX_PATH = Path("data/index.json")
-
-def build(index_state: dict) -> dict:
+def cmd_build(index_state: dict) -> dict:
     pages = crawl(URL)
     if not pages:
         print("Crawl returned no pages.")
         return index_state
     index = build_index(pages)
-    save_index(index, INDEX_PATH)
+    save_index(index)
 
     print(f"\nCrawling done. Indexed {len(pages)} pages and {len(index)} unique words.")
     return index
 
-def find(args: str, index: dict):
+def cmd_find(args: str, index: dict):
     """
     Find pages containing all words in query
     """
@@ -62,7 +60,7 @@ def find(args: str, index: dict):
         print(f"  {rank}. {url}  (score: {score})")
     print()
     
-def print(args: str, index: dict):
+def cmd_print(args: str, index: dict):
     """
     Print index entry for inputted word
     """
@@ -78,8 +76,17 @@ def print(args: str, index: dict):
         print(f"Note: 'print' only looks up one word. Showing results for '{words[0]}' instead.")
     print_word(words[0], index)
 
-def load():
-    
+def cmd_load(index_state: dict) -> dict:
+    """
+    Load index from file and return it
+    """
+    try:
+        index = load_index()
+        print(f"Index loaded.")
+        return index
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        return index_state
 
 def run_shell():
     """
@@ -101,13 +108,13 @@ def run_shell():
         args = parts[1] if len(parts) > 1 else ""
 
         if command == "build":
-            index = build(index)
-        # elif command == "load":
-        #     index = load(index)
+            index = cmd_build(index)
+        elif command == "load":
+            index = cmd_load(index)
         elif command == "print":
-            print(args, index)
+            cmd_print(args, index)
         elif command == "find":
-            find(args, index)
+            cmd_find(args, index)
         elif command == "help":
             print(HELP_TEXT)
  
