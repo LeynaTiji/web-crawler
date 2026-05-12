@@ -3,6 +3,33 @@ import math
  
 logger = logging.getLogger(__name__)
 
+def compute_TFIDF(word: str, url: str, index: dict, total_pages: int):
+    """
+    Computes the TF-IDF score for a word in a specific page.
+    The implementation of TF-IDF comes from https://www.geeksforgeeks.org/machine-learning/understanding-tf-idf-term-frequency-inverse-document-frequency/
+
+    TF stands for term frequency and measures how often a word appears in a page divided by
+    by the total number of terms in a page
+
+    IDF stands for Inverse Document Frequency which is the log of the total pages divided by 
+    how many pages contain the word.
+
+    Returns computed TF-IDF score
+
+    """
+    frequency = index[word][url]["freq"]
+    total_pos = len(index[word][url]["positions"])
+
+    # computes TF 
+    tf = frequency / total_pos if total_pos > 0 else 0
+
+    # computes IDF 
+    pages_with_word = len(index[word])
+    idf = math.log(total_pages / (1 + pages_with_word))
+
+    #higher the value the more 
+    return tf * idf
+
 def find_query(query: str, index: dict) -> list[tuple[str, int]]:
     """
     Find all pages containing every word in the query.
@@ -64,30 +91,4 @@ def print_word(query: str, index: dict) -> None:
         print(f"    Positions : {positions}")
         print()   
         
-def compute_TFIDF(word: str, url: str, index: dict, total_pages: int):
-    """
-    Computes the TF-IDF score for a word in a specific page.
-    The implementation of TF-IDF comes from https://www.geeksforgeeks.org/machine-learning/understanding-tf-idf-term-frequency-inverse-document-frequency/
-
-    TF stands for term frequency and measures how often a word appears in a page divided by
-    by the total number of terms in a page
-
-    IDF stands for Inverse Document Frequency which is the log of the total pages divided by 
-    how many pages contain the word.
-
-    Returns computed TF-IDF score
-
-    """
-    frequency = index[word][url]["freq"]
-    total_pos = len(index[word][url]["positions"])
-
-    # computes TF 
-    tf = frequency / total_pos if total_pos > 0 else 0
-
-    # computes IDF 
-    pages_with_word = len(index[word])
-    idf = math.log(total_pages / (1 + pages_with_word))
-
-    #higher the value the more 
-    return tf * idf
 
