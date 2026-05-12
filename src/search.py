@@ -9,7 +9,10 @@ def get_total_pages(index: dict) -> int:
     """
     # empty set of urls so that only unique pages are counted
     urls = set()
-    for url in index.values():
+    for key, url in index.items():
+        # skip key metadata
+        if key == "page_lengths":
+            continue
         # urls from inner dict
         urls.update(url.keys())
     return len(urls)
@@ -28,11 +31,16 @@ def compute_TFIDF(word: str, url: str, index: dict, total_pages: int):
     Returns computed TF-IDF score
 
     """
-    frequency = index[word][url]["freq"]
-    total_pos = len(index[word][url]["positions"])
+    entry = index[word][url]
+    frequency = entry["freq"]
+
+    # get page length or default to empty set
+    page_lengths = index.get("page_lengths", {})
+    # get url
+    doc_length = page_lengths.get(url)
 
     # computes TF 
-    tf = frequency / total_pos if total_pos > 0 else 0
+    tf = frequency / doc_length if doc_length > 0 else 0
 
     # computes IDF 
     pages_with_word = len(index[word])
