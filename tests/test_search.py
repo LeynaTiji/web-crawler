@@ -3,6 +3,7 @@ import math
 from io import StringIO
 import sys
 
+from src.indexer import build_index
 from src.search import find_query, print_word, compute_TFIDF
 
 SAMPLE_INDEX = {
@@ -21,7 +22,6 @@ SAMPLE_INDEX = {
         "https://example.com/page2": {"freq": 1, "positions": [0]},
     },
 }
-
 
 class TestFind(unittest.TestCase):
 
@@ -71,7 +71,7 @@ class TestPrintWords(unittest.TestCase):
         print_word(word, index)
         sys.stdout = sys.__stdout__
         return captured.getvalue()
-    
+
     def test_prints_word_info(self):
         output = self._capture_output("good", SAMPLE_INDEX)
         self.assertIn("good", output)
@@ -114,3 +114,21 @@ class TestTFIDF(unittest.TestCase):
         }
         score = compute_TFIDF("word", "https://example.com", edge_index, 1)
         self.assertEqual(score, 0.0)
+
+
+class TestIntegration(unittest.TestCase):
+
+    def test_build_and_search_pipeline(self):
+        """Test full pipeline: index some pages, then search them."""
+        pages = {
+            "https://example.com/page1": "good friends are hard to find",
+            "https://example.com/page2": "good morning is a good greeting",
+        }
+        index = build_index(pages)
+        results = find_query("good", index)
+        #both pages should appear in results
+        urls = [url for url, _ in results]
+        self.assertIn("https://example.com/page1", urls)
+        self.assertIn("https://example.com/page2", urls)
+        self.assertEqual(len(results), 2)
+
