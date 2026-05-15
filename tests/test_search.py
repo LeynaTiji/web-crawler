@@ -115,7 +115,6 @@ class TestTFIDF(unittest.TestCase):
         score = compute_TFIDF("word", "https://example.com", edge_index, 1)
         self.assertEqual(score, 0.0)
 
-
 class TestIntegration(unittest.TestCase):
 
     def test_build_and_search_pipeline(self):
