@@ -1,10 +1,16 @@
 import unittest
+import math
 from io import StringIO
 import sys
 
-from src.search import find_query, print_word
+from src.indexer import build_index
+from src.search import find_query, print_word, compute_TFIDF
 
 SAMPLE_INDEX = {
+    "page_lengths": {
+        "https://example.com/page1": 50,
+        "https://example.com/page2": 30,
+    },
     "good": {
         "https://example.com/page1": {"freq": 3, "positions": [0, 5, 12]},
         "https://example.com/page2": {"freq": 1, "positions": [4]},
@@ -16,7 +22,6 @@ SAMPLE_INDEX = {
         "https://example.com/page2": {"freq": 1, "positions": [0]},
     },
 }
-
 
 class TestFind(unittest.TestCase):
 
@@ -66,7 +71,7 @@ class TestPrintWords(unittest.TestCase):
         print_word(word, index)
         sys.stdout = sys.__stdout__
         return captured.getvalue()
-    
+
     def test_prints_word_info(self):
         output = self._capture_output("good", SAMPLE_INDEX)
         self.assertIn("good", output)
@@ -84,3 +89,45 @@ class TestPrintWords(unittest.TestCase):
         output_lower = self._capture_output("good", SAMPLE_INDEX)
         output_upper = self._capture_output("GOOD", SAMPLE_INDEX)
         self.assertEqual(output_lower, output_upper)
+
+class TestTFIDF(unittest.TestCase):
+
+    def test_returns_float(self):
+        score = compute_TFIDF("good", "https://example.com/page1", SAMPLE_INDEX, 2)
+        self.assertIsInstance(score, float)
+ 
+    def test_higher_frequency_gives_higher_score(self):
+        score1 = compute_TFIDF("good", "https://example.com/page1", SAMPLE_INDEX, 10)
+        score2 = compute_TFIDF("good", "https://example.com/page2", SAMPLE_INDEX, 10)
+        self.assertGreater(score1, score2)
+ 
+    def test_rare_word_scores_higher_idf(self):
+        # friends appears in 1 page, good appears in 2 pages
+        idf_friends = math.log(2 / (1 + 1))
+        idf_good = math.log(2 / (1 + 2))
+        self.assertGreater(idf_friends, idf_good)
+ 
+    def test_score_is_zero(self):
+        # positions list is empty
+        edge_index = {
+            "word": {"https://example.com": {"freq": 1, "positions": []}}
+        }
+        score = compute_TFIDF("word", "https://example.com", edge_index, 1)
+        self.assertEqual(score, 0.0)
+
+class TestIntegration(unittest.TestCase):
+
+    def test_build_and_search_pipeline(self):
+        """Test full pipeline: index some pages, then search them."""
+        pages = {
+            "https://example.com/page1": "good friends are hard to find",
+            "https://example.com/page2": "good morning is a good greeting",
+        }
+        index = build_index(pages)
+        results = find_query("good", index)
+        #both pages should appear in results
+        urls = [url for url, _ in results]
+        self.assertIn("https://example.com/page1", urls)
+        self.assertIn("https://example.com/page2", urls)
+        self.assertEqual(len(results), 2)
+

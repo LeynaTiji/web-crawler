@@ -78,7 +78,7 @@ def cmd_print(args: str, index: dict):
 
 def cmd_load(index_state: dict) -> dict:
     """
-    Load index from file and return it
+    Load index from file and returns it
     """
     try:
         index = load_index()
@@ -90,7 +90,7 @@ def cmd_load(index_state: dict) -> dict:
 
 def run_shell():
     """
-    Reads commands 
+    Reads command line arguements. 
     """
 
     print(BANNER)

@@ -50,7 +50,10 @@ class TestBuildIndex(unittest.TestCase):
         self.assertEqual(positions, [0, 3])
  
     def test_empty_pages_returns_empty_index(self):
-        self.assertEqual(build_index({}), {})
+        index = build_index({})
+        # remove the metadata key and check no word entries exist
+        index.pop("page_lengths", None)
+        self.assertEqual(index, {})
  
     def test_case_insensitive(self):
         index = build_index({"https://example.com": "Good good GOOD"})

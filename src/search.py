@@ -1,6 +1,54 @@
 import logging
+import math
  
 logger = logging.getLogger(__name__)
+
+def get_total_pages(index: dict) -> int:
+    """
+    Counts the total number of unique pages across the entire index for idf formula
+    """
+    # empty set of urls so that only unique pages are counted
+    urls = set()
+    for key, url in index.items():
+        # skip key metadata
+        if key == "page_lengths":
+            continue
+        # urls from inner dict
+        urls.update(url.keys())
+    return len(urls)
+
+def compute_TFIDF(word: str, url: str, index: dict, total_pages: int):
+    """
+    Computes the TF-IDF score for a word in a specific page.
+    The implementation of TF-IDF comes from https://www.geeksforgeeks.org/machine-learning/understanding-tf-idf-term-frequency-inverse-document-frequency/
+
+    TF stands for term frequency and measures how often a word appears in a page divided by
+    by the total number of terms in a page
+
+    IDF stands for Inverse Document Frequency which is the log of the total pages divided by 
+    how many pages contain the word.
+
+    Returns computed TF-IDF score
+
+    """
+    entry = index[word][url]
+    frequency = entry["freq"]
+
+    # get page length or default to empty set
+    page_lengths = index.get("page_lengths", {})
+    # get url
+    doc_length = page_lengths.get(url, 0)
+
+    # computes TF 
+    tf = frequency / doc_length if doc_length > 0 else 0
+
+    # computes IDF 
+    pages_with_word = len(index[word])
+    idf = math.log(total_pages / (1 + pages_with_word))
+
+    #higher the value the more 
+    return tf * idf
+
 
 def find_query(query: str, index: dict) -> list[tuple[str, int]]:
     """
@@ -27,17 +75,19 @@ def find_query(query: str, index: dict) -> list[tuple[str, int]]:
     if not common_pages:
         return []
     
+    total_pages = get_total_pages(index)
+    
     #rank by page with highest frequency of query 
     score = []
     for url in common_pages:
-        total_score = sum(index[word][url]["freq"] for word in words)
+        total_score = sum(compute_TFIDF(word, url, index, total_pages) for word in words)
         score.append((url, total_score))
  
     # Sort highest score first
     score.sort(key=lambda x: x[1], reverse=True)
     return score
 
-def print_word(query: str, index: dict):
+def print_word(query: str, index: dict) -> None:
     """
     Print inverted index for a given word, showing page, frequency and position of word.
     """
@@ -53,9 +103,16 @@ def print_word(query: str, index: dict):
         return
     
     entries = index[query]
+    total_pages = get_total_pages(index)
     print(f"\nInverted index for '{query}' ({len(entries)} page(s)):\n")
 
-    for url, data in entries.items():
+    sorted_entries = sorted(
+        entries.items(),
+        key=lambda x: compute_TFIDF(query, x[0], index, total_pages),
+        reverse=True
+    )
+
+    for url, data in sorted_entries:
         freq = data["freq"]
         positions = data["positions"]
         print(f"  {url}")

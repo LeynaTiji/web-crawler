@@ -49,9 +49,12 @@ def build_index(pages: dict[str, str]) -> dict:
     """
 
     index = {}
+    page_lengths = {}  
 
     for url, text in pages.items():
         tokens = tokenise(text)
+        #store total tokens per page
+        page_lengths[url] = len(tokens)
 
         for position, word in enumerate(tokens):
             if word not in index:
@@ -62,6 +65,8 @@ def build_index(pages: dict[str, str]) -> dict:
  
             index[word][url]["freq"] += 1
             index[word][url]["positions"].append(position)      
-        
+    
+    index["page_lengths"] = page_lengths
+
     logger.info(f"Index built: {len(index)} unique words")
     return index
